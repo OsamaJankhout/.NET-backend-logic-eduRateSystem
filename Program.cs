@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using eduRateSystem.Data;
 using eduRateSystem.Models;
@@ -49,8 +48,13 @@ app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
 {
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    var services = scope.ServiceProvider;
+
+    var dbContext = services.GetRequiredService<ApplicationDbContext>();
+    await dbContext.Database.MigrateAsync();
+
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
     await IdentitySeeder.SeedRolesAsync(roleManager);
     await IdentitySeeder.SeedAdminUserAsync(userManager, roleManager);
