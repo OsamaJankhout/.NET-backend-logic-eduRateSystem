@@ -6,6 +6,30 @@ using eduRateSystem.Seed;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var rawConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (!string.IsNullOrEmpty(rawConnectionString))
+{
+    var masked = rawConnectionString;
+
+    var passwordIndex = masked.IndexOf("Password=", StringComparison.OrdinalIgnoreCase);
+    if (passwordIndex >= 0)
+    {
+        var end = masked.IndexOf(';', passwordIndex);
+        if (end >= 0)
+            masked = masked.Substring(0, passwordIndex) + "Password=***" + masked.Substring(end);
+        else
+            masked = masked.Substring(0, passwordIndex) + "Password=***";
+    }
+
+    Console.WriteLine("ACTIVE CONNECTION STRING:");
+    Console.WriteLine(masked);
+}
+else
+{
+    Console.WriteLine("ACTIVE CONNECTION STRING: NULL");
+}
+
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
