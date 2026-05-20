@@ -46,18 +46,27 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-using (var scope = app.Services.CreateScope())
+try
 {
-    var services = scope.ServiceProvider;
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
 
-    var dbContext = services.GetRequiredService<ApplicationDbContext>();
-    await dbContext.Database.MigrateAsync();
+        var dbContext = services.GetRequiredService<ApplicationDbContext>();
+        await dbContext.Database.MigrateAsync();
 
-    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
-    await IdentitySeeder.SeedRolesAsync(roleManager);
-    await IdentitySeeder.SeedAdminUserAsync(userManager, roleManager);
+        await IdentitySeeder.SeedRolesAsync(roleManager);
+        await IdentitySeeder.SeedAdminUserAsync(userManager, roleManager);
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine("STARTUP ERROR:");
+    Console.WriteLine(ex.ToString());
+    throw;
 }
 
 app.Run();
